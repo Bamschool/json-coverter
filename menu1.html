@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSON Transformer</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      textarea {
+        width: 100%;
+        height: 200px;
+        margin-bottom: 20px;
+      }
+      input[type="number"] {
+        width: 100px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>JSON Transformer</h1>
+    <textarea id="jsonInput" placeholder="Paste your JSON here..."></textarea>
+    <input type="number" id="startIndex" placeholder="Start Index" value="1" />
+    <button onclick="transformJson()">Transform</button>
+    <textarea
+      id="jsonOutput"
+      readonly
+      placeholder="Transformed JSON will appear here..."
+    ></textarea>
+
+    <script>
+      function transformJson() {
+        const jsonInput = document.getElementById("jsonInput").value;
+        const startIndex = parseInt(
+          document.getElementById("startIndex").value,
+          10
+        );
+        try {
+          const inputData = JSON.parse(jsonInput);
+          const transformedData = [];
+          let currentIndex = startIndex;
+
+          const processExercise = (exercise, prefix) => {
+            transformedData.push({
+              id: `se${String(currentIndex).padStart(3, "0")}`,
+              answer:
+                exercise.answer ||
+                exercise.correct_answer ||
+                exercise.string_answer ||
+                exercise.correct_word,
+              translation:
+                exercise.translation ||
+                exercise.english_answer ||
+                exercise.english_sentence?.join(", ") ||
+                exercise.english_word,
+              exercise_id: exercise.exercise_id,
+            });
+            currentIndex++;
+          };
+
+          inputData.data.forEach((item) => {
+            item.grid_choice_exercise.forEach((exercise) =>
+              processExercise(exercise, "g")
+            );
+            item.quiz_exercise.forEach((exercise) =>
+              processExercise(exercise, "q")
+            );
+            item.choice_exercise.forEach((exercise) =>
+              processExercise(exercise, "c")
+            );
+            item.ox_quiz_exercise.forEach((exercise) =>
+              processExercise(exercise, "o")
+            );
+          });
+
+          document.getElementById("jsonOutput").value = JSON.stringify(
+            transformedData,
+            null,
+            2
+          );
+        } catch (error) {
+          document.getElementById("jsonOutput").value = "Invalid JSON";
+        }
+      }
+    </script>
+  </body>
+</html>
