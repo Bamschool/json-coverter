@@ -23,6 +23,7 @@
         margin-bottom: 20px;
       }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.29.5/dist/umd/supabase.min.js"></script>
   </head>
   <body>
     <h1>JSON Transformer</h1>
@@ -36,8 +37,15 @@
       placeholder="Transformed JSON will appear here..."
     ></textarea>
     <button onclick="downloadJson()">Download JSON</button>
+    <button onclick="uploadToSupabase()">Upload to Supabase</button>
 
     <script>
+      const SUPABASE_URL =
+        "postgres://postgres.mfwjvegackwjjpubdjqa:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres";
+      const SUPABASE_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1md2p2ZWdhY2t3ampwdWJkanFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDEyMjMyNjMsImV4cCI6MjAxNjc5OTI2M30.pbYXhbc-_8IJ8hF99rS-Z7817A_s7HNjEuPNCJJUGRI";
+      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
       let transformedData = [];
 
       function transformJson() {
@@ -106,6 +114,22 @@
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+      }
+
+      async function uploadToSupabase() {
+        try {
+          const { data, error } = await supabase
+            .from("speaking_exercise")
+            .insert(transformedData);
+
+          if (error) {
+            console.error("Error inserting data:", error);
+          } else {
+            console.log("Data inserted successfully:", data);
+          }
+        } catch (error) {
+          console.error("Error uploading data to Supabase:", error);
+        }
       }
     </script>
   </body>
